@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<script src="velocity.js"></script>
+	<script type="text/javascript" src="https://d3js.org/d3.v4.min.js" charset="utf-8""></script>
+	<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+	<script src="https://d3js.org/d3-array.v1.min.js"></script>
+	<script src="https://d3js.org/d3-geo.v1.min.js"></script>
+	<script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+	<script src="https://d3js.org/d3-color.v1.min.js"></script>
+	<script src="https://d3js.org/d3-dispatch.v1.min.js"></script>
+	<script src="https://d3js.org/d3-ease.v1.min.js"></script>
+	<script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
+	<script src="https://d3js.org/d3-selection.v1.min.js"></script>
+	<script src="https://d3js.org/d3-timer.v1.min.js"></script>
+	<script src="https://d3js.org/d3-transition.v1.min.js"></script>
+	<script src="https://d3js.org/d3-drag.v1.min.js"></script>
+	<script src="https://d3js.org/d3-zoom.v1.min.js"></script>
+	<script src="moment.js"></script>
+	<script defer src="https://use.fontawesome.com/releases/v5.6.1/js/all.js" integrity="sha384-R5JkiUweZpJjELPWqttAYmYM1P3SNEJRM6ecTQF05pFFtxmCO+Y1CiUhvuDzgSVZ" crossorigin="anonymous"></script>
+	<link rel="stylesheet" type="text/css" href="index.css">
+</head>
+<body style="overflow: hidden;">
+	<svg id = "svg_1">
+		<rect id = "background" width = 100% height = 100% style = "fill: #000000;" ></rect>
+		<g id = "zoom_group">
+			<g id = "map_group"></g>
+			<g id = "explosions_group"></g>
+		</g>
+	</svg>
+	<div style = "display: flex">
+		<div id = "controls">
+			<select id = "selection" onchange="selection_change()">
+				<option>World</option>
+				<option>USA</option>
+				<option>USSR</option>
+				<option>UK</option>
+				<option>France</option>
+				<option>China</option>
+				<option>Pakistan</option>
+				<option>India</option>
+			</select>
+			<select id = "sound_selection" onchange="sound_selection_change()" style="width: 10%;
+																					  margin-top: 20px;
+																					  margin-left: 50px;
+																					  background-color: black;
+																					  color: white;">
+				<option>Geiger</option>
+				<option>Beep</option>
+			</select>
+			<br>
+			<input type="range" id = "slider" name = "slider" oninput = "year_change()" onmousedown="stop_animation()" 
+					min="0" max="19400" step="1">
+
+			<button id = "play_button" onclick="play_animation()">
+				<i class="fa fa-play"></i>
+			</button>
+			<!--I'll style the button here as it doesn't seem to want to load it from the csv-->
+			<button id = "mute_button" onclick="mute_animation()" style ="width: 30px;
+																		  height: 30px;
+																		  margin-left: 10px;
+																		  position: relative;
+																		  top: 6px;
+																		  border: 0px;
+																		  font-size: 30px;
+																		  outline: none;
+																		  color: white;
+																		  background-color: rgba(0,0,0,0);">
+				<i class="fa fa-volume-up"></i>
+			</button>
+
+			<br>
+			<textarea id = "year_text" readonly="true"></textarea>
+			<input type="CheckBox" id = "keep_explosions_checkbox" onclick="deletePreviousTests()">
+			<label id = "keep_explosions_label" for="keep_explosions_checkbox">Show past tests</label>
+		</div>
+		<div id = "flags" style="flex-grow: 1; margin-top: -300px;">
+			<img src="Assets\\Images\\usa_color.png" width="17px" style="float: right; margin-right: 20px;">
+			<img src="Assets\\Images\\usa_flag.png" width="30px" style="float: right; margin-right: 10px;">
+			<label id = "usa_count" style="float: right; margin-right: 10px;color: white">0
+			</label>
+			<br><br>
+			<img src="Assets\\Images\\ussr_color.png" width="17px" style="float: right; margin-right: 20px;">
+			<img src="Assets\\Images\\ussr_flag.png" width="30px" style="float: right; margin-right: 10px">
+			<label id = "ussr_count" style="float: right; margin-right: 10px;color: white">0
+			</label>
+			<br><br>
+			<img src="Assets\\Images\\france_color.png" width="17px" style="float: right; margin-right: 20px;">
+			<img src="Assets\\Images\\france_flag.png" width="30px" style="float: right; margin-right: 10px">
+			<label id = "france_count" style="float: right; margin-right: 10px;color: white">0
+			</label>
+			<br><br>
+			<img src="Assets\\Images\\uk_color.png" width="17px" style="float: right; margin-right: 20px;">
+			<img src="Assets\\Images\\uk_flag.png" width="30px" style="float: right; margin-right: 10px">
+			<label id = "uk_count" style="float: right; margin-right: 10px;color: white">0
+			</label>
+			<br><br>
+			<img src="Assets\\Images\\china_color.png" width="17px" style="float: right; margin-right: 20px;">
+			<img src="Assets\\Images\\china_flag.png" width="30px" style="float: right; margin-right: 10px">
+			<label id = "china_count" style="float: right; margin-right: 10px;color: white">0
+			</label>
+			<br><br>
+			<img src="Assets\\Images\\india_color.png" width="17px" style="float: right; margin-right: 20px;">
+			<img src="Assets\\Images\\india_flag.png" width="30px" style="float: right; margin-right: 10px">
+			<label id = "india_count" style="float: right; margin-right: 10px;color: white">0
+			</label>
+			<br><br>
+			<img src="Assets\\Images\\pakistan_color.png" width="17px" style="float: right; margin-right: 20px;">
+			<img src="Assets\\Images\\pakistan_flag.png" width="30px" style="float: right; margin-right: 10px">
+			<label id = "pakistan_count" style="float: right; margin-right: 10px;color: white">0
+			</label>
+		</div>
+	</div>
+	<div>
+		<p align = "center" style="margin-top: -50px; color: #7c7c7c; font-size: 26px;">Nuclear tests from 1945 to 1998.</p>
+		<p align = "right" style="margin-top: -40px; margin-right: 10px; color: #7c7c7c">
+		Source of data: http://www.johnstonsarchive.net/nuclear/tests/</p>
+	</div>
+
+	<script type="text/javascript">
+		const dataPath = "all_nations_rev_3.csv";
+		//Global Variables
+		var explosions_opacity = "0.9";
+		var animation_playing = false;
+		var animation_muted = false;
+		var starting_moment = "1945-7-10";
+		var explosion_audio = new Audio("Assets\\Audio\\geiger_tick.mp3");
+		var explosion_audio_2 = new Audio("Assets\\Audio\\geiger_tick_2.mp3");
+		var explosion_audio_3 = new Audio("Assets\\Audio\\geiger_tick_3.mp3");
+		var explosion_audio_4 = new Audio("Assets\\Audio\\geiger_tick_4.mp3");
+		var explosion_audio_5 = new Audio("Assets\\Audio\\geiger_tick_5.mp3");
+		var beep_sound = new Audio("Assets\\Audio\\beep.mp3");
+		var current_sound = "Geiger";
+		var usa_color = "60, 59, 255";
+		var ussr_color = "204, 1, 1";
+		var uk_color = "91, 36, 125";
+		var france_color = "28, 181, 46";
+		var china_color = "255, 223, 1";
+		var india_color = "255, 153, 51";
+		var pakistan_color = "1, 63, 22";
+		//First audio more than once so there is a bigger chance it is chosen
+		var geiger_ticks = [explosion_audio,
+							explosion_audio_2, 
+							explosion_audio_3, 
+							//explosion_audio_4, 
+							explosion_audio_5];
+		var currently_playing = geiger_ticks[0]
+		//Id of the set interval on the window
+		var intervalId = null;
+		var slider = document.getElementById("slider");
+		var yearText = document.getElementById("year_text");
+		var svg = d3.select("svg");
+		var map_group = svg.select("#map_group");
+		var explosions_group = svg.select("#explosions_group");
+		//Rainbow cyclical palette, receives a value in [0, 1]
+		var palette = d3.scaleSequential(d3.interpolateOrRd);
+		var button = document.getElementById("play_button");
+		var vol_button = document.getElementById("mute_button");
+		var explosions_checkbox = document.getElementById("keep_explosions_checkbox");
+
+		var usa_count = document.getElementById("usa_count");
+		var ussr_count = document.getElementById("ussr_count");
+		var france_count = document.getElementById("france_count");
+		var uk_count = document.getElementById("uk_count");
+		var china_count = document.getElementById("china_count");
+		var india_count = document.getElementById("india_count");
+		var pakistan_count = document.getElementById("pakistan_count");
+		//d3.geoPath() receives a geojson feature and returns an svg path
+		//d3.geoPath.projection specifies the type of projection used for translating
+		//the 3d coordinates from a globe into 2d coordinates
+		//.center moves the center of the map, essentially cropping part of it, the goal here is to
+		//reduce the space wasted in the antartica, as it is not displayed anyway
+		var projection = d3.geoNaturalEarth1().translate([document.getElementById("svg_1").clientWidth/2, 									document.getElementById("svg_1").clientHeight/2])
+									 		  .scale(340)
+									 	 	  .center([0, 10]);
+		slider.value = 0;
+		//explosions_checkbox.disabled = true;
+		
+		function map_zoom() {
+		   svg.select("#zoom_group").attr("transform", d3.event.transform);
+		}
+		//This basically assigns the mouse wheel event to a listener, check https://github.com/d3/d3-zoom
+		svg.call(d3.zoom().on("zoom", map_zoom));
+		//A call like this resets the zoom transform to the initial one:
+		//selection.call(zoom.transform, d3.zoomIdentity);
+
+		function play_animation(){
+			//explosions_checkbox.disabled = false;
+			var increaseStep = function(){
+				slider.value = parseInt(slider.value) + 1;
+				slider.oninput();
+			}
+			if(!animation_playing){
+				//Start the animation
+				animation_playing = true;
+				if(!explosions_checkbox.checked){
+					deletePreviousTests();
+				}
+				button.innerHTML = "<i class=\"fa fa-stop\"></i>";
+				intervalId = window.setInterval(increaseStep, 20);
+			}else{
+				stop_animation();
+			}
+		}
+
+		function stop_animation(){
+			//Stop the animation
+			//Separated from play_animation so it can be called when clicking on
+			//the slider
+			//explosions_checkbox.disabled = true;
+			animation_playing = false;
+			button.innerHTML = "<i class=\"fa fa-play\"></i>";
+			window.clearInterval(intervalId);
+			//Re-draw circles in case past tests were't being shown
+			drawCircles();
+		}
+
+		function mute_animation(){
+			if(animation_muted){
+				animation_muted = false;
+				vol_button.innerHTML = "<i class=\"fa fa-volume-up\"></i>";
+			}else{
+				animation_muted = true;
+				vol_button.innerHTML = "<i class=\"fa fa-volume-mute\"></i>";
+			}
+		}
+
+		function deletePreviousTests(){
+			if(!animation_playing){
+				return;
+			}
+			for(let i = 0; i < circles.length; i++){
+				circles[i].style.fill = "#0000";
+			}
+		}
+
+		function year_change(){
+			yearText.value = moment(starting_moment).add(slider.value, "days").format("YYYY-MM-DD");
+			//Draw new circles again
+			drawCircles()
+		}
+
+		function selection_change(){
+			deletePreviousTests();
+			drawCircles();
+		}
+
+		function sound_selection_change(){
+			current_sound = document.getElementById("sound_selection").value;
+		}
+		
+		//Drawing the map
+		d3.json("world.json", function(json){
+			map_group.selectAll("path").data(json.features)
+								 	 .enter()
+								  	 .append("path")
+								 	 .attr("d", d3.geoPath().projection(projection))
+								 	 .attr("vector-effect", "non-scaling-stroke")
+								 	 .attr("fill", function(d, i){return "#2b2b2b";});
+		});
+
+		//Creating the circles
+		d3.csv(dataPath, loadCircles);
+
+		function loadCircles(data){
+			var radius = function(d){
+			if(d.YIELD == "null" || d.YIELD == 0 || d.YIELD == 1){
+					return 1;
+				}else{
+					return Math.abs(Math.log(d.YIELD));
+				}
+			}
+
+			for(let i = 0; i < data.length; i++){
+				d = data[i];
+				r = 2  * radius(d)
+				projected_coords = projection([d.LONG, d.LAT]);
+				explosions_group.append("circle")
+								.attr("cx", projected_coords[0])
+								.attr("cy", projected_coords[1])
+								.attr("r", r + "px")
+								.style("fill", "rgba(0, 0, 0, 0)")
+								.attr("opacity", 0.65)
+								.attr("data-nation", d.NATION)
+								.attr("data-year", d.YEAR)
+								.attr("data-month", d.MON_NUMBER)
+								.attr("data-day", d.DAY)
+								.attr("data-radius", r)
+								.attr("data-displayed",false);
+			}
+			//Drawing the circles
+			drawCircles();
+		}
+
+		function drawCircles(){
+		circles = document.getElementsByTagName("circle");
+		//Determine what to draw
+		var selectedMoment = moment(starting_moment).add(slider.value, "days");
+		var explosion_moment = null
+
+		var selectedOption = document.getElementById("selection").value;
+		var toDraw = "";
+		if(selectedOption == "World"){
+			toDraw = "All";
+		}else{
+			toDraw = selectedOption;
+		}
+		var addedNow = [];
+		//console.log(toDraw);
+
+		var set_color = function(d){
+				//console.log(toDraw, d.dataset.nation, toDraw == d.dataset.nation);
+				/*
+				There is a bug here I can't seem to figure out. When playing the animation over some
+				tests with the option to keep them displayed checked, and then de-selecting the option,
+				going back on the timeline and playing the animation over the same tests, only the 
+				size-reduction part plays. However, the next time you do this with the option not selected,
+				everything will show as intended, showing the explosion first growing then disappearing. 
+				It seems to happen only the first time after playing the animation with the option selected.
+				*/
+				explosion_moment = moment(selectedMoment.year() + "-" +
+										 (selectedMoment.month() + 1) + "-" +
+										  selectedMoment.date());
+				//console.log(explosion_moment);
+				draw_this = false;
+				count_this = false;
+				color_to_use = "";
+				color_to_use_alt = "";
+				if(toDraw == "All" || toDraw == d.dataset.nation){
+					switch(d.dataset.nation){
+						case "USA":
+							color_to_use = usa_color;
+							break;
+						case "USSR":
+							color_to_use = ussr_color;
+							break;
+						case "France":
+							color_to_use = france_color;
+							break;
+						case "UK":
+							color_to_use = uk_color;
+							break;
+						case "China":
+							color_to_use = china_color;
+							break;
+						case "India":
+							color_to_use = india_color;
+							break;
+						case "Pakistan":
+							color_to_use = pakistan_color;
+							break;
+					}
+					if(d.dataset.year == selectedMoment.year()){
+							if(d.dataset.month < selectedMoment.month() + 1){
+								draw_this = true;
+				   			}else if(d.dataset.month == selectedMoment.month() + 1){
+				   				if(d.dataset.day < selectedMoment.date()){
+							   		draw_this = true;
+							   	}else if(d.dataset.day == selectedMoment.date()){
+
+							   		if(!explosions_checkbox.checked){
+							   			//Animate the explosion and fade to black. These calls are asynchronous and will play
+							   			//sequentially in the order they were added to the svg element
+								   		d.velocity({r : "0px", 
+								   					fill: "rgba(" + color_to_use + "," + explosions_opacity + ")"}, {duration: 0})
+										 .velocity({ r: (1.5*d.dataset.radius) + "px" }, {duration: 500})
+										 .velocity({ fill: "rgba(0, 0, 0, 0)" , r: "0px"}, { duration: 500})
+										 .velocity({r: d.dataset.radius + "px"}, {duration: 0});
+
+									}else{
+										//Animate the explosion. These calls are asynchronous and will play
+							   			//sequentially in the order they were added to the svg element
+										d.velocity({r : "0px"}, {duration: 0})
+								   		 .velocity({fill: "rgba(" + color_to_use +","+ explosions_opacity + ")"}, {duration: 0})
+										 .velocity({ r: (1.5*d.dataset.radius) + "px" }, {duration: 500})
+										 .velocity({ r: (d.dataset.radius) + "px" }, {duration: 250});
+
+										d.dataset.displayed = true;
+									}
+
+									addedNow.push(d);
+
+									//Play the audio along with the animation
+									if(animation_playing && !animation_muted){
+										currently_playing.pause();
+										currently_playing.currentTime = 0;
+										if(current_sound == "Geiger"){
+											//Choose a sound at random
+											currently_playing = geiger_ticks[Math.floor(Math.random() * geiger_ticks.length)];
+										}else if(current_sound == "Beep"){
+											currently_playing = beep_sound;
+											beep_sound.play();
+										}
+										currently_playing.play().catch(error => {
+																				//Play was stopped before it was loaded and played
+			    																});
+									}
+							   	}
+				   			}
+
+					}else if(d.dataset.year < selectedMoment.year()){
+					   draw_this = true;		
+					}
+
+					if(draw_this){
+						if(explosions_checkbox.checked || !animation_playing){
+							d.style.fill = "rgba(" + color_to_use + ", " + explosions_opacity + ")";
+							d.dataset.displayed = true;
+						}
+					}
+
+				}else if(d.dataset.year == selectedMoment.year()){
+				 			if(d.dataset.month < selectedMoment.month() + 1){
+								count_this = true;
+				   			}else if(d.dataset.month == selectedMoment.month() + 1){
+				   				if(d.dataset.day < selectedMoment.date()){
+							   		count_this = true;
+				   			}else if(d.dataset.day == selectedMoment.date()){
+				   				count_this = true;
+				   				addedNow.push(d);
+				   			}
+				   		}
+				   	}else if(d.dataset.year < selectedMoment.year()){
+					   count_this = true;		
+					}
+
+				if(!animation_playing && !draw_this){
+					d.style.fill = "rgba(0, 0, 0, 0)";
+					if(count_this){
+						d.dataset.displayed = true;
+					}else{
+						d.dataset.displayed = false;
+					}
+				}
+				
+			}
+
+		for(let i = 0; i < circles.length; i++){
+			set_color(circles[i]);
+		}
+
+		//Now we need to update the test count for every nation, I will only add the new ones
+		//if the animation is playing, but if not we have to count everything again
+		if(animation_playing){
+			for(let i = 0; i < addedNow.length; i++){
+				switch(addedNow[i].dataset.nation){
+					case "USA":
+						usa_count.innerHTML = parseInt(usa_count.textContent) + 1;
+						break;
+					case "USSR":
+						ussr_count.innerHTML = parseInt(ussr_count.textContent) + 1;
+						break;
+					case "France":
+						france_count.innerHTML = parseInt(france_count.textContent) + 1;
+						break;
+					case "UK":
+						uk_count.innerHTML = parseInt(uk_count.textContent) + 1;
+						break;
+					case "China":
+						china_count.innerHTML = parseInt(china_count.textContent) + 1;
+						break;
+					case "India":
+						india_count.innerHTML = parseInt(india_count.textContent) + 1;
+						break;
+					case "Pakistan":
+						pakistan_count.innerHTML = parseInt(pakistan_count.textContent) + 1;
+						break;
+				}
+			}
+		}else{
+			let usa = 0;
+			let ussr = 0;
+			let france = 0;
+			let uk = 0;
+			let china = 0;
+			let india = 0;
+			let pakistan = 0;
+			for(let i = 0; i < circles.length; i++){
+				switch(circles[i].dataset.nation){
+					case "USA":
+						if(circles[i].dataset.displayed == "true"){
+							usa += 1;
+						}
+						break;
+					case "USSR":
+						if(circles[i].dataset.displayed == "true"){
+							ussr += 1;
+						}
+						break;
+					case "France":
+						if(circles[i].dataset.displayed == "true"){
+							france += 1;
+						}
+						break;
+					case "UK":
+						if(circles[i].dataset.displayed == "true"){
+							uk += 1;
+						}
+						break;
+					case "China":
+						if(circles[i].dataset.displayed == "true"){
+							china += 1;
+						}
+						break;
+					case "India":
+						if(circles[i].dataset.displayed == "true"){
+							india += 1;
+						}
+						break;
+					case "Pakistan":
+						if(circles[i].dataset.displayed == "true"){
+							pakistan += 1;
+						}
+						break;
+				}
+			}
+			usa_count.innerHTML = usa;
+			ussr_count.innerHTML = ussr;
+			france_count.innerHTML = france;
+			uk_count.innerHTML = uk;
+			china_count.innerHTML = china;
+			india_count.innerHTML = india;
+			pakistan_count.innerHTML = pakistan;
+		}
+	}
+
+	</script>
+</body>
+</html>

@@ -1,0 +1,193 @@
+
+html{
+	width: 100%;
+	height: 100%;
+	margin: 0px;
+}
+
+body{
+	width: 100%;
+	height: 100%;
+	margin: 0px;
+	padding: 0px;
+  overflow: hidden;
+}
+
+
+
+#controls{
+  flex-grow: 3;
+  margin-top: -150px;
+  padding: 0px;
+  box-sizing: border-box;
+}
+
+#svg_1{
+	width: 100%;
+	height: 100%;
+	margin: 0px;
+	padding: 0px;
+	box-sizing: border-box;
+}
+
+#controls > #selection{
+	width: 15%;
+	margin-top: 20px;
+	margin-left: 50px;
+	background-color: black;
+	color: white;
+}
+
+#controls > #sound_selection{
+  width: 10%;
+  margin-top: 20px;
+  margin-left: 50px;
+  background-color: black;
+  color: white;
+}
+
+#controls > #slider{
+	width: 30%;
+	margin-top: 30px;
+	margin-left: 50px;
+	background: black;
+	color: white;
+	outline: white;
+}
+
+#controls > #play_button{
+	width: 30px;
+	height: 30px;
+	margin-left: 10px;
+	position: relative;
+	top: 6px;
+	border: 0px;
+	font-size: 30px;
+	outline: none;
+	color: white;
+	background-color: rgba(0,0,0,0);
+}
+
+#controls > #mute_button{
+  width: 30px;
+  height: 30px;
+  margin-left: 10px;
+  position: relative;
+  top: 6px;
+  border: 0px;
+  font-size: 30px;
+  outline: none;
+  color: white;
+  background-color: rgba(0,0,0,0);
+}
+
+#keep_explosions_checkbox{
+  margin-left: 20px;
+  width: 17px;
+  height: 17px;
+  position: relative;
+  bottom: 3px;
+}
+
+#keep_explosions_label{
+  color: white;
+  position: relative;
+  bottom: 5px;
+}
+
+#controls > #year_text{
+	margin-top: 20px;
+	margin-left: 50px;
+	width: 150px;
+	height: 20px;
+	color: white;
+	background: black;
+	resize: none;
+}
+
+input[type=range] {
+  -webkit-appearance: none; /* Hides the slider so that custom slider can be made */
+  width: 100%; /* Specific width is required for Firefox. */
+  background: transparent; /* Otherwise white in Chrome */
+}
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+}
+
+input[type=range]:focus {
+  outline: none; /* Removes the blue border. You should probably do some kind of focus styling for accessibility reasons though. */
+}
+
+input[type=range]::-ms-track {
+  width: 100%;
+  cursor: pointer;
+
+  /* Hides the slider so custom styles can be added */
+  background: transparent; 
+  border-color: transparent;
+  color: transparent;
+}
+
+/* Special styling for WebKit/Blink */
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  border: 2px solid #FFFFFF;
+  height: 22px;
+  width: 22px;
+  border-radius: 11px;
+  background: #000000;
+  cursor: pointer;
+  margin-top: -7px; /* You need to specify a margin in Chrome, but in Firefox and IE it is automatic */
+}
+
+/* All the same stuff for Firefox */
+input[type=range]::-moz-range-thumb {
+  border: 2px solid #FFFFFF;
+  height: 22px;
+  width: 22px;
+  border-radius: 11px;
+  background: #000000;
+  cursor: pointer;
+}
+
+/* All the same stuff for IE */
+input[type=range]::-ms-thumb {
+  border: 2px solid #FFFFFF;
+  height: 22px;
+  width: 22px;
+  border-radius: 11px;
+  background: #000000;
+  cursor: pointer;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 8.4px;
+  cursor: pointer;
+  background: #000000;
+  border-radius: 1.3px;
+  border: 1px solid #FFFFFF;
+}
+
+input[type=range]:focus::-webkit-slider-runnable-track {
+  background: #000000;
+}
+
+input[type=range]::-moz-range-track {
+  width: 100%;
+  height: 8.4px;
+  cursor: pointer;
+  background: #000000;
+  border-radius: 1.3px;
+  border: 0.2px solid #FFFFFF;
+}
+
+input[type=range]::-ms-track {
+  width: 100%;
+  height: 8.4px;
+  cursor: pointer;
+  background: #000000;
+  border-radius: 1.3px;
+  border: 0.2px solid #FFFFFF;
+}
